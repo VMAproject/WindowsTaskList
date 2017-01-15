@@ -1,6 +1,7 @@
-language: java
-jdk:
-  - oraclejdk8
-
-  os:
-    - windows
+{
+  "language": "java",
+  "jdk": "oraclejdk8",
+  "group": "stable",
+  "dist": "precise",
+  "os": "Windows"
+}
