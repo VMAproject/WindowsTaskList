@@ -16,12 +16,8 @@ public class MemoryUnitParser {
     }
 
     public static String parse(final long bytes) {
-        if (bytes < 0) {
-            throw new IllegalArgumentException("Negative memory used: " + bytes);
-        }
-        if (bytes == 0) {
-            return "0 B";
-        }
+        if (bytes < 0) throw new IllegalArgumentException("Negative memory used: " + bytes);
+        if (bytes == 0) return "0 B";
         String result = null;
         final long[] _dividers = MemoryUnit.dividers;
         final String[] _units = MemoryUnit.units;

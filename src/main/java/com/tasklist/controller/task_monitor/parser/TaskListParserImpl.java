@@ -45,6 +45,7 @@ class TaskListParserImpl implements TaskListParser {
             smss.exe                       420 Services                   0       216 ��
          */
 //        String regex = "(^\\p{L}+[\\s?\\p{Alnum}]*?) (\\d+?) ([\\s?\\p{Alnum}]*?) (\\d+?) (\\p{all}*)";
+
         String regex = "(^\\p{L}+[\\s?\\p{Alnum}.,_~!@#$%^&*()]*?) (\\d+[.,_]?) ([\\s?\\p{Alnum}.,_]*?) (\\d+[.,_]?) (\\p{all}*)";
         Pattern pattern = Pattern.compile(regex, Pattern.UNICODE_CHARACTER_CLASS);
         Matcher matcher = pattern.matcher(line);
@@ -86,11 +87,8 @@ class TaskListParserImpl implements TaskListParser {
     private String removeNonDigitChars(String number) {
         StringBuilder sb = new StringBuilder();
         char[] chars = number.toCharArray();
-        for (char c : chars) {
-            if (Character.isDigit(c)) {
-                sb.append(c);
-            }
-        }
+        for (char c : chars)
+            if (Character.isDigit(c)) sb.append(c);
         return sb.toString();
     }
 }

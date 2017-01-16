@@ -16,17 +16,16 @@ import static com.google.common.collect.Lists.newArrayList;
  * TODO : use java.lang.ProcessBuilder
  * Executes win32//tasklist.
  * The result is a formattes list of running processes.
- *
+ * <p>
  * Example output:
- *        ��� ������                     PID ��� ������          � ������       ������
- *        ========================= ======== ================ =========== ============
- *        System Idle Process              0 Services                   0         4 ��
- *        System                           4 Services                   0   587�732 ��
- *        smss.exe                       420 Services                   0       216 ��
- *        csrss.exe                      588 Services                   0     1�444 ��
- *        csrss.exe                      680 Console                    1     5�744 ��
- *        wininit.exe                    704 Services                   0       716 ��
- *
+ * ��� ������                     PID ��� ������          � ������       ������
+ * ========================= ======== ================ =========== ============
+ * System Idle Process              0 Services                   0         4 ��
+ * System                           4 Services                   0   587�732 ��
+ * smss.exe                       420 Services                   0       216 ��
+ * csrss.exe                      588 Services                   0     1�444 ��
+ * csrss.exe                      680 Console                    1     5�744 ��
+ * wininit.exe                    704 Services                   0       716 ��
  */
 @Component
 public class TaskListCommand extends Command<List<String>> {

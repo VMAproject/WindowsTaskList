@@ -58,9 +58,7 @@ public class MenuBarController {
     private void handleImport() {
         // Open file dialog
         File file = xmlFileChooser().showOpenDialog(mainApp.getPrimaryStage());
-        if (file != null) {
-            rememberDirectory(file);
-        }
+        if (file != null) rememberDirectory(file);
         mainApp.doImport(file);
     }
 

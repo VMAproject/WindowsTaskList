@@ -10,6 +10,5 @@
 
     <context:annotation-config/>
     <context:component-scan base-package="com.tasklist"/>
-    <!-- bean definitions go here -->
 
 </beans>

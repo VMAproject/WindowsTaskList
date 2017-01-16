@@ -9,7 +9,6 @@ import java.util.Scanner;
 
 /**
  * Determines the system's charset.
- * <p>
  * Example output:
  * IBM866
  */
@@ -28,15 +27,12 @@ public class CharsetCommand extends Command<Charset> {
 
         String windowsCodePage = determineWindowsCodePage();
         Charset charset = findMatchingCharset(windowsCodePage);
-        if (charset == null) {
-            charset = Charset.defaultCharset();
-        }
+        if (charset == null) charset = Charset.defaultCharset();
         return charset;
     }
 
     private String determineWindowsCodePage() {
         String windowsCodePage = null;
-        // Java 7 feature - try-with-resources. Ensures autoclosing the stream
         try (InputStream in = process.getInputStream()) {
             windowsCodePage = new Scanner(in).skip(".*:").next();
         } catch (IOException e) {
