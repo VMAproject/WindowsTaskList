@@ -1,6 +1,7 @@
 package com.tasklist.controller.exporting;
 
 import com.tasklist.model.TaskDto;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
@@ -12,7 +13,7 @@ public class XmlExporterTest {
 
     private Exporter exporter = new XmlExporter();
 
-    ///////   @Test
+       @Test
     public void testName() throws Exception {
         TaskDto distinct = new TaskDto.Builder()
                 .withName("zzzzzzzz")
