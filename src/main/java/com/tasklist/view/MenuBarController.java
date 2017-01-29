@@ -25,9 +25,7 @@ public class MenuBarController {
 
         if (file != null) {
             // Make sure it has the correct extension
-            if (!file.getPath().endsWith(".xml")) {
-                file = new File(file.getPath() + ".xml");
-            }
+            if (!file.getPath().endsWith(".xml")) file = new File(file.getPath() + ".xml");
             rememberDirectory(file);
             mainApp.doExport(file);
         }

@@ -1,5 +1,6 @@
 package com.tasklist;
 
+
 import com.tasklist.controller.TaskManager;
 import com.tasklist.controller.exporting.Exporter;
 import com.tasklist.controller.importing.Importer;
@@ -36,7 +37,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
-
+/**
+ * @author Yakiv
+ * @since 04.02.2016
+ */
 public class MainApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainApp.class);
@@ -79,8 +83,11 @@ public class MainApp extends Application {
 
     public void sortByMemory(Boolean ascending) {
         MemoryUsedDescendingComparator descendingComparator = new MemoryUsedDescendingComparator();
-        if (ascending) taskList.sort(descendingComparator.reversed());
-        else taskList.sort(descendingComparator);
+        if (ascending) {
+            taskList.sort(descendingComparator.reversed());
+        } else {
+            taskList.sort(descendingComparator);
+        }
     }
 
     public void groupTasksByName() {
@@ -90,22 +97,26 @@ public class MainApp extends Application {
     }
 
     public void doExport(File exportTo) {
-        if (exportTo != null) try {
-            List<TaskDto> tasksGroupedByName = taskManager.taskListCollapseDuplicates(this.taskList);
-            exporterXml.export(tasksGroupedByName, exportTo);
-        } catch (Exception e) {
-            showExceptionDialog("Export to XML failed.", "File=" + exportTo.getPath(), e);
-            LOG.error(String.format("Failed export to XML file=%s. Exception: %s", exportTo.getPath(), e.getMessage()));
+        if (exportTo != null) {
+            try {
+                List<TaskDto> tasksGroupedByName = taskManager.taskListCollapseDuplicates(this.taskList);
+                exporterXml.export(tasksGroupedByName, exportTo);
+            } catch (Exception e) {
+                showExceptionDialog("Export to XML failed.", "File=" + exportTo.getPath(), e);
+                LOG.error(String.format("Failed export to XML file=%s. Exception: %s", exportTo.getPath(), e.getMessage()));
+            }
         }
     }
 
     public void doExportToExcel(File exportTo) {
-        if (exportTo != null) try {
-            List<TaskDto> tasksGroupedByName = taskManager.taskListCollapseDuplicates(this.taskList);
-            exporterExcel.export(tasksGroupedByName, exportTo);
-        } catch (Exception e) {
-            showExceptionDialog("Export to Excel failed.", "File=" + exportTo.getPath(), e);
-            LOG.error(String.format("Failed export to Excel file=%s. Exception: %s", exportTo.getPath(), e.getMessage()));
+        if (exportTo != null) {
+            try {
+                List<TaskDto> tasksGroupedByName = taskManager.taskListCollapseDuplicates(this.taskList);
+                exporterExcel.export(tasksGroupedByName, exportTo);
+            } catch (Exception e) {
+                showExceptionDialog("Export to Excel failed.", "File=" + exportTo.getPath(), e);
+                LOG.error(String.format("Failed export to Excel file=%s. Exception: %s", exportTo.getPath(), e.getMessage()));
+            }
         }
     }
 
@@ -185,10 +196,14 @@ public class MainApp extends Application {
 
     private ObservableList<TaskDtoDiff> mergeTaskLists(List<TaskDto> left, List<TaskDto> right) {
         Map<String, TaskDto> leftMap = new HashMap<>();
-        for (TaskDto taskDto : left) leftMap.put(taskDto.getName(), taskDto);
+        for (TaskDto taskDto : left) {
+            leftMap.put(taskDto.getName(), taskDto);
+        }
 
         Map<String, TaskDto> rightMap = new HashMap<>();
-        for (TaskDto taskDto : right) rightMap.put(taskDto.getName(), taskDto);
+        for (TaskDto taskDto : right) {
+            rightMap.put(taskDto.getName(), taskDto);
+        }
 
         Set<String> allTaskNames = new HashSet<>(leftMap.keySet());
         allTaskNames.addAll(rightMap.keySet());
@@ -230,7 +245,7 @@ public class MainApp extends Application {
     }
 
     private <T> Callback<TableColumn<TaskDtoDiff, T>, TableCell<TaskDtoDiff, T>> colorHighlightCallback(DiffSign... allowed) {
-        return (TableColumn<TaskDtoDiff, T> column) -> new TableCell<TaskDtoDiff, T>() {
+        return column -> new TableCell<TaskDtoDiff, T>() {
             @Override
             protected void updateItem(T item, boolean empty) {
                 super.updateItem(item, empty);
@@ -258,11 +273,15 @@ public class MainApp extends Application {
                                     final int _pidIndexRight = 5;
                                     final int _MemoryIndexLeft = 2;
                                     final int _MemoryIndexRight = 6;
-                                    if ((index == _pidIndexLeft || index == _pidIndexRight) && !diff.getLeft().getPid().equals(diff.getRight().getPid())) {
-                                        setStyle("-fx-background-color: Khaki");
+                                    if (index == _pidIndexLeft || index == _pidIndexRight) {
+                                        if (!diff.getLeft().getPid().equals(diff.getRight().getPid())) {
+                                            setStyle("-fx-background-color: Khaki");
+                                        }
                                     }
-                                    if ((index == _MemoryIndexLeft || index == _MemoryIndexRight) && !diff.getLeft().getMemory().equals(diff.getRight().getMemory())) {
-                                        setStyle("-fx-background-color: Khaki");
+                                    if (index == _MemoryIndexLeft || index == _MemoryIndexRight) {
+                                        if (!diff.getLeft().getMemory().equals(diff.getRight().getMemory())) {
+                                            setStyle("-fx-background-color: Khaki");
+                                        }
                                     }
                                     break;
                                 default:
@@ -318,7 +337,7 @@ public class MainApp extends Application {
     }
 
     private void setIcon() {
-        String iconPath = "/images/task-manager-icon.png";
+        String iconPath = "/resources/images/task-manager-icon.png";
         try {
             Image icon = new Image(iconPath);
             this.primaryStage.getIcons().add(icon);
@@ -328,7 +347,7 @@ public class MainApp extends Application {
     }
 
     private void initSpringContext() {
-        applicationContext = new ClassPathXmlApplicationContext("/beans.xml");
+        applicationContext = new ClassPathXmlApplicationContext("/resources/beans.xml");
         taskManager = applicationContext.getBean(TaskManager.class);
         exporterXml = (Exporter) applicationContext.getBean("xmlExporter");
         exporterExcel = (Exporter) applicationContext.getBean("excelExporter");
@@ -337,7 +356,7 @@ public class MainApp extends Application {
     private void initRootLayout() {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("/fxml/RootLayout.fxml"));
+            loader.setLocation(MainApp.class.getResource("/resources/fxml/RootLayout.fxml"));
             rootLayout = loader.load();
 
             MenuBarController controller = loader.getController();
@@ -353,7 +372,7 @@ public class MainApp extends Application {
 
     private void showTaskList() {
         try {
-            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/fxml/TaskManager.fxml"));
+            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/resources/fxml/TaskManager.fxml"));
             BorderPane taskListOverview = loader.load();
             rootLayout.setCenter(taskListOverview);
 
