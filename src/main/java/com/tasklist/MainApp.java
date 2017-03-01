@@ -37,10 +37,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
-/**
- * @author Yakiv
- * @since 04.02.2016
- */
+
 public class MainApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainApp.class);
