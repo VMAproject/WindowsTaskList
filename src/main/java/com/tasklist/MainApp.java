@@ -14,6 +14,7 @@ import com.tasklist.model.TaskDtoDiff;
 import com.tasklist.view.MenuBarController;
 import com.tasklist.view.TaskManagerController;
 import javafx.application.Application;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -143,13 +144,9 @@ public class MainApp extends Application {
         leftNameColumn.setCellValueFactory(cellData -> cellData.getValue().getLeft().nameProperty());
         leftPidColumn.setCellValueFactory(cellData -> cellData.getValue().getLeft().pidProperty());
         leftMemoryColumn.setCellValueFactory(cellData -> cellData.getValue().getLeft().memoryHumanReadableProperty());
-        leftMemoryColumn.sortTypeProperty().addListener((observable, oldValue, newValue) -> {
+        leftMemoryColumn.sortTypeProperty().addListener((ObservableValue<? extends TableColumn.SortType> observable, TableColumn.SortType oldValue, TableColumn.SortType newValue) -> {
             TaskDtoDiffLeftMemoryDescendingComparator descendingComparator = new TaskDtoDiffLeftMemoryDescendingComparator();
-            if (taskDiffLeftSortMemoryAscending) {
-                mergedTaskListObservable.sort(descendingComparator.reversed());
-            } else {
-                mergedTaskListObservable.sort(descendingComparator);
-            }
+            mergedTaskListObservable.sort(taskDiffLeftSortMemoryAscending ? descendingComparator.reversed() : descendingComparator);
             taskDiffLeftSortMemoryAscending = !taskDiffLeftSortMemoryAscending;
         });
 
@@ -164,13 +161,9 @@ public class MainApp extends Application {
         rightNameColumn.setCellValueFactory(cellData -> cellData.getValue().getRight().nameProperty());
         rightPidColumn.setCellValueFactory(cellData -> cellData.getValue().getRight().pidProperty());
         rightMemoryColumn.setCellValueFactory(cellData -> cellData.getValue().getRight().memoryHumanReadableProperty());
-        rightMemoryColumn.sortTypeProperty().addListener((observable, oldValue, newValue) -> {
+        rightMemoryColumn.sortTypeProperty().addListener((ObservableValue<? extends TableColumn.SortType> observable, TableColumn.SortType oldValue, TableColumn.SortType newValue) -> {
             TaskDtoDiffRightMemoryDescendingComparator descendingComparator = new TaskDtoDiffRightMemoryDescendingComparator();
-            if (taskDiffRightSortMemoryAscending) {
-                mergedTaskListObservable.sort(descendingComparator.reversed());
-            } else {
-                mergedTaskListObservable.sort(descendingComparator);
-            }
+            mergedTaskListObservable.sort(taskDiffRightSortMemoryAscending ? descendingComparator.reversed() : descendingComparator);
             taskDiffRightSortMemoryAscending = !taskDiffRightSortMemoryAscending;
         });
 
@@ -198,9 +191,7 @@ public class MainApp extends Application {
         }
 
         Map<String, TaskDto> rightMap = new HashMap<>();
-        for (TaskDto taskDto : right) {
-            rightMap.put(taskDto.getName(), taskDto);
-        }
+        for (TaskDto taskDto : right) rightMap.put(taskDto.getName(), taskDto);
 
         Set<String> allTaskNames = new HashSet<>(leftMap.keySet());
         allTaskNames.addAll(rightMap.keySet());
@@ -215,23 +206,13 @@ public class MainApp extends Application {
         for (String taskName : allTaskNames) {
             TaskDto leftTask = emptyTask;
             TaskDto rightTask = emptyTask;
-            if (leftMap.containsKey(taskName)) {
-                leftTask = leftMap.get(taskName);
-            }
-            if (rightMap.containsKey(taskName)) {
-                rightTask = rightMap.get(taskName);
-            }
+            if (leftMap.containsKey(taskName)) leftTask = leftMap.get(taskName);
+            if (rightMap.containsKey(taskName)) rightTask = rightMap.get(taskName);
             // Determine DiffSign
             DiffSign diffSign;
-            if (leftTask.equals(emptyTask)) {
-                diffSign = DiffSign.REMOVED;
-            } else if (rightTask.equals(emptyTask)) {
-                diffSign = DiffSign.ADDED;
-            } else if (leftTask.equals(rightTask)) {
-                diffSign = DiffSign.NO_CHANGES;
-            } else {
-                diffSign = DiffSign.CHANGED;
-            }
+            if (leftTask.equals(emptyTask)) diffSign = DiffSign.REMOVED;
+            else if (rightTask.equals(emptyTask)) diffSign = DiffSign.ADDED;
+            else diffSign = leftTask.equals(rightTask) ? DiffSign.NO_CHANGES : DiffSign.CHANGED;
             TaskDtoDiff taskDtoDiff = new TaskDtoDiff(leftTask, diffSign, rightTask);
             taskDtoDiffList.add(taskDtoDiff);
         }
@@ -242,54 +223,53 @@ public class MainApp extends Application {
     }
 
     private <T> Callback<TableColumn<TaskDtoDiff, T>, TableCell<TaskDtoDiff, T>> colorHighlightCallback(DiffSign... allowed) {
-        return column -> new TableCell<TaskDtoDiff, T>() {
-            @Override
-            protected void updateItem(T item, boolean empty) {
-                super.updateItem(item, empty);
+        return (TableColumn<TaskDtoDiff, T> column) -> {
+            return new TableCell<TaskDtoDiff, T>() {
+                @Override
+                protected void updateItem(T item, boolean empty) {
+                    super.updateItem(item, empty);
 
-                TableRow<TaskDtoDiff> tableRow = getTableRow();
-                // Reset styles (e.g. for sorting)
-                setStyle("");
-                if (tableRow != null) {
-                    TaskDtoDiff diff = tableRow.getItem();
-                    if (item != null && !empty) {
-                        setText(item.toString());
-                        if (Arrays.asList(allowed).contains(diff.getDiffSign())) {
-                            switch (diff.getDiffSign()) {
-                                case ADDED:
-                                    setStyle("-fx-background-color: Aquamarine");
-                                    break;
-                                case REMOVED:
-                                    setStyle("-fx-background-color: DarkSalmon");
-                                    break;
-                                case CHANGED:
-                                    // Determine, changed PID or memory?
-                                    TableColumn<TaskDtoDiff, T> tableColumn = getTableColumn();
-                                    int index = getTableView().getColumns().indexOf(tableColumn);
-                                    final int _pidIndexLeft = 1;
-                                    final int _pidIndexRight = 5;
-                                    final int _MemoryIndexLeft = 2;
-                                    final int _MemoryIndexRight = 6;
-                                    if (index == _pidIndexLeft || index == _pidIndexRight) {
-                                        if (!diff.getLeft().getPid().equals(diff.getRight().getPid())) {
-                                            setStyle("-fx-background-color: Khaki");
+                    TableRow<TaskDtoDiff> tableRow = getTableRow();
+                    // Reset styles (e.g. for sorting)
+                    setStyle("");
+                    if (tableRow != null) {
+                        TaskDtoDiff diff = tableRow.getItem();
+                        if (item != null && !empty) {
+                            setText(item.toString());
+                            if (Arrays.asList(allowed).contains(diff.getDiffSign())) {
+                                switch (diff.getDiffSign()) {
+                                    case ADDED:
+                                        setStyle("-fx-background-color: Aquamarine");
+                                        break;
+                                    case REMOVED:
+                                        setStyle("-fx-background-color: DarkSalmon");
+                                        break;
+                                    case CHANGED:
+                                        // Determine, changed PID or memory?
+                                        TableColumn<TaskDtoDiff, T> tableColumn = getTableColumn();
+                                        int index = getTableView().getColumns().indexOf(tableColumn);
+                                        final int _pidIndexLeft = 1;
+                                        final int _pidIndexRight = 5;
+                                        final int _MemoryIndexLeft = 2;
+                                        final int _MemoryIndexRight = 6;
+                                        if (index == _pidIndexLeft || index == _pidIndexRight) {
+                                            if (!diff.getLeft().getPid().equals(diff.getRight().getPid())) {
+                                                setStyle("-fx-background-color: Khaki");
+                                            }
                                         }
-                                    }
-                                    if (index == _MemoryIndexLeft || index == _MemoryIndexRight) {
-                                        if (!diff.getLeft().getMemory().equals(diff.getRight().getMemory())) {
+                                        if ((index == _MemoryIndexLeft || index == _MemoryIndexRight) && !diff.getLeft().getMemory().equals(diff.getRight().getMemory()))
                                             setStyle("-fx-background-color: Khaki");
-                                        }
-                                    }
-                                    break;
-                                default:
-                                    setStyle("");
+                                        break;
+                                    default:
+                                        setStyle("");
+                                }
                             }
+                        } else {
+                            setStyle("");
                         }
-                    } else {
-                        setStyle("");
                     }
                 }
-            }
+            };
         };
     }
 
